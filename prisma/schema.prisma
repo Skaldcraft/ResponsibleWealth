@@ -1,0 +1,302 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  admin
+  editor
+}
+
+enum EsgCategory {
+  green
+  mixed
+  excluded
+}
+
+enum CompanyLifecycleStatus {
+  candidate
+  active
+  under_review
+  removed
+  archived
+}
+
+enum CompanySourceType {
+  ir
+  sustainability
+  market_data
+  esg_rating
+  news
+}
+
+enum EditorialUpdateType {
+  thesis
+  esg
+  operations
+  results
+  controversy
+}
+
+enum ReviewType {
+  monthly
+  quarterly
+  annual
+}
+
+enum NewsletterRunStatus {
+  draft
+  review_required
+  approved
+  sent
+  failed
+}
+
+enum NewsletterSubscriberStatus {
+  active
+  unsubscribed
+  bounced
+}
+
+enum NewsletterSendStatus {
+  queued
+  sent
+  failed
+}
+
+model User {
+  id        String      @id @default(cuid())
+  email     String      @unique
+  name      String
+  role      UserRole
+  createdAt DateTime    @default(now())
+  auditLogs AuditLog[]
+  reviews   ReviewLog[]
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  entityType  String
+  entityId    String
+  action      String
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  actorUser   User?    @relation(fields: [actorUserId], references: [id], onDelete: SetNull)
+}
+
+model Company {
+  id               String            @id @default(cuid())
+  ticker           String            @unique
+  slug             String            @unique
+  name             String
+  exchange         String
+  country          String
+  sector           String
+  shortDescription String
+  active           Boolean           @default(true)
+  lifecycleStatus  CompanyLifecycleStatus @default(candidate)
+  haloFit          Int               @default(3)
+  esgFit           Int               @default(3)
+  mediumTermScore  Int               @default(3)
+  reviewDueAt      DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  basketMembers    BasketMember[]
+  marketSnapshots  MarketSnapshot[]
+  esgProfile       EsgProfile?
+  sources          CompanySource[]
+  editorialUpdates EditorialUpdate[]
+  reviewLogs       ReviewLog[]
+  newsItems        NewsItem[]
+}
+
+model Basket {
+  id          String          @id @default(cuid())
+  slug        String          @unique
+  name        String
+  description String
+  active      Boolean         @default(true)
+  benchmarkId String?
+  benchmark   Benchmark?      @relation(fields: [benchmarkId], references: [id], onDelete: SetNull)
+  members     BasketMember[]
+}
+
+model BasketMember {
+  id               String    @id @default(cuid())
+  basketId         String
+  companyId        String
+  order            Int
+  membershipStatus String
+  startDate        DateTime?
+  endDate          DateTime?
+  note             String?
+  basket           Basket    @relation(fields: [basketId], references: [id], onDelete: Cascade)
+  company          Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([basketId, companyId])
+}
+
+model MarketSnapshot {
+  id               String   @id @default(cuid())
+  companyId        String
+  asOfDate         DateTime
+  currency         String
+  closePrice       Float
+  dayChangePct     Float
+  monthReturnPct   Float?
+  ytdReturnPct     Float?
+  oneYearReturnPct Float?
+  sourceProvider   String
+  isDelayed        Boolean  @default(true)
+  company          Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@unique([companyId, asOfDate])
+}
+
+model Benchmark {
+  id             String              @id @default(cuid())
+  slug           String              @unique
+  symbol         String              @unique
+  name           String
+  sourceProvider String
+  baskets        Basket[]
+  snapshots      BenchmarkSnapshot[]
+}
+
+model BenchmarkSnapshot {
+  id               String    @id @default(cuid())
+  benchmarkId      String
+  asOfDate         DateTime
+  closeValue       Float
+  monthReturnPct   Float?
+  ytdReturnPct     Float?
+  oneYearReturnPct Float?
+  benchmark        Benchmark @relation(fields: [benchmarkId], references: [id], onDelete: Cascade)
+
+  @@unique([benchmarkId, asOfDate])
+}
+
+model EsgProfile {
+  id             String      @id @default(cuid())
+  companyId      String      @unique
+  category       EsgCategory
+  rationaleShort String
+  rationaleLong  String
+  strengths      String
+  concerns       String
+  lastReviewedAt DateTime?
+  company        Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model CompanySource {
+  id        String            @id @default(cuid())
+  companyId String
+  type      CompanySourceType
+  label     String
+  url       String
+  sortOrder Int               @default(0)
+  active    Boolean           @default(true)
+  company   Company           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model EditorialUpdate {
+  id            String              @id @default(cuid())
+  companyId     String
+  title         String
+  summary       String
+  body          String
+  updateType    EditorialUpdateType
+  effectiveDate DateTime
+  published     Boolean             @default(false)
+  company       Company             @relation(fields: [companyId], references: [id], onDelete: Cascade)
+}
+
+model ReviewLog {
+  id             String     @id @default(cuid())
+  companyId      String
+  reviewType     ReviewType
+  summary        String
+  reviewerUserId String?
+  reviewedAt     DateTime
+  company        Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  reviewer       User?      @relation(fields: [reviewerUserId], references: [id], onDelete: SetNull)
+}
+
+model NewsItem {
+  id              String   @id @default(cuid())
+  companyId       String?
+  title           String
+  summary         String
+  url             String
+  sourceName      String
+  publishedAt     DateTime
+  tag             String
+  importanceScore Int      @default(1)
+  verified        Boolean  @default(false)
+  company         Company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
+}
+
+model NewsletterRun {
+  id          String                @id @default(cuid())
+  periodStart DateTime
+  periodEnd   DateTime
+  status      NewsletterRunStatus
+  generatedAt DateTime?
+  approvedAt  DateTime?
+  sentAt      DateTime?
+  createdAt   DateTime              @default(now())
+  draft       NewsletterDraft?
+  sources     NewsletterSource[]
+  sendLogs    NewsletterSendLog[]
+}
+
+model NewsletterDraft {
+  id              String        @id @default(cuid())
+  newsletterRunId String        @unique
+  subject         String
+  preheader       String
+  htmlBody        String
+  textBody        String
+  webTitle        String
+  webSlug         String        @unique
+  modelName       String
+  promptVersion   String
+  newsletterRun   NewsletterRun @relation(fields: [newsletterRunId], references: [id], onDelete: Cascade)
+}
+
+model NewsletterSource {
+  id              String        @id @default(cuid())
+  newsletterRunId String
+  sourceType      String
+  sourceTable     String
+  sourceRecordId  String
+  companyId       String?
+  newsletterRun   NewsletterRun @relation(fields: [newsletterRunId], references: [id], onDelete: Cascade)
+}
+
+model NewsletterSubscriber {
+  id             String                     @id @default(cuid())
+  email          String                     @unique
+  status         NewsletterSubscriberStatus
+  locale         String
+  confirmedAt    DateTime?
+  unsubscribedAt DateTime?
+  createdAt      DateTime                   @default(now())
+  sendLogs       NewsletterSendLog[]
+}
+
+model NewsletterSendLog {
+  id                String               @id @default(cuid())
+  newsletterRunId   String
+  subscriberId      String
+  providerMessageId String?
+  status            NewsletterSendStatus
+  sentAt            DateTime?
+  newsletterRun     NewsletterRun        @relation(fields: [newsletterRunId], references: [id], onDelete: Cascade)
+  subscriber        NewsletterSubscriber @relation(fields: [subscriberId], references: [id], onDelete: Cascade)
+}
