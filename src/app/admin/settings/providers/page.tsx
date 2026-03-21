@@ -7,7 +7,7 @@ export default function AdminProvidersPage() {
         <p className="muted">This page documents the current configuration surface for market data, email, and authentication providers. In the MVP, values are driven by environment variables.</p>
         <ul>
           <li>Market data provider: delayed or end-of-day only</li>
-          <li>Email provider: Resend-compatible</li>
+          <li>Email provider: SendPulse-compatible</li>
           <li>Admin auth: environment-backed operator credentials</li>
         </ul>
       </section>

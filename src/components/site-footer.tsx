@@ -4,7 +4,7 @@ export function SiteFooter() {
   return (
     <footer className="site-footer">
       <div className="shell site-footer__inner">
-        <div className="muted">
+        <div className="site-footer__note muted">
           Responsible Wealth is an informational research platform. Nothing on this site constitutes personalized investment advice or a recommendation to buy, sell, or hold any security.
         </div>
         <div className="footer-links">

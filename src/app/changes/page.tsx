@@ -12,7 +12,7 @@ export default async function ChangesPage() {
         <div className="eyebrow">Recent changes</div>
         <h1>How the basket evolves over time</h1>
         <p className="lede">
-          This page is meant to make the research process more transparent. It shows how companies are reassessed, updated, and contextualized over the medium term rather than treated as fixed picks.
+          This page helps make the research process transparent. It tracks how we reassess, update, and place companies in context over time instead of treating them as fixed picks.
         </p>
       </section>
 

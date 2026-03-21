@@ -17,13 +17,20 @@ export default async function ComparePage() {
       <section className="hero">
         <div className="eyebrow">Compare</div>
         <h1>Medium-term comparison, not intraday noise</h1>
-        <p className="lede">These comparisons are meant to show how the basket evolves over time relative to a benchmark and a broader HALO grouping. Short-term signals are intentionally not the focus.</p>
+        <p className="lede">These comparisons illustrate how the basket changes over time compared with a benchmark and the larger HALO group. The emphasis is on long-term trends rather than short-term signals.</p>
       </section>
       <Disclaimer compact />
       <section className="card">
         <PerformanceComparisonChart data={performanceData} />
       </section>
-      <section className="table-wrap">
+      <section className="table-wrap table-wrap--editorial table-wrap--compare">
+        <div className="table-intro">
+          <div>
+            <div className="eyebrow">Comparison windows</div>
+            <h2>Basket, benchmark, and broader context</h2>
+          </div>
+          <p className="muted">These windows help you compare trajectory and context without drifting into short-term decision-making.</p>
+        </div>
         <table>
           <thead><tr><th>Window</th><th>HALO ESG</th><th>{data.benchmark.name}</th><th>Broader HALO</th></tr></thead>
           <tbody>{windows.map((window: keyof typeof data.basketReturns) => <tr key={window}><td>{window}</td><td>{formatPercent(data.basketReturns[window])}</td><td>{formatPercent(data.benchmarkReturns[window])}</td><td>{formatPercent(data.broaderHalo[window])}</td></tr>)}</tbody>

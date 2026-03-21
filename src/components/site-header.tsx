@@ -4,17 +4,19 @@ export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="shell site-header__inner">
-        <Link className="brand" href="/">
-          <strong>Responsible Wealth</strong>
-          <span>Responsible, medium-term investment research</span>
-        </Link>
+        <div className="brand-group">
+          <Link className="brand" href="/">
+            <strong>Responsible Wealth</strong>
+            <span>Responsible, medium-term investment research</span>
+          </Link>
+        </div>
         <nav className="nav" aria-label="Main navigation">
-          <Link href="/halo-esg">Index</Link>
           <Link href="/compare">Compare</Link>
-          <Link href="/methodology">Our Approach</Link>
           <Link href="/changes">Recent changes</Link>
-          <Link href="/sources">Sources</Link>
+          <Link href="/how-it-works">How it works</Link>
+          <Link href="/methodology">Our Approach</Link>
           <Link href="/newsletter">Newsletter</Link>
+          <Link href="/sources">Sources</Link>
           <Link href="/resources">Resources</Link>
         </nav>
       </div>
