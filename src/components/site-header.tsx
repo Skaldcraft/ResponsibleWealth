@@ -13,10 +13,9 @@ export function SiteHeader() {
         <nav className="nav" aria-label="Main navigation">
           <Link href="/compare">Compare</Link>
           <Link href="/changes">Recent changes</Link>
-          <Link href="/how-it-works">How it works</Link>
-          <Link href="/methodology">Our Approach</Link>
+          <Link href="/method-and-purpose">Method and Purpose</Link>
           <Link href="/newsletter">Newsletter</Link>
-          <Link href="/sources">Sources</Link>
+          <Link href="/sources">Company profiles</Link>
           <Link href="/resources">Resources</Link>
         </nav>
       </div>

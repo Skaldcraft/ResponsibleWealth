@@ -174,7 +174,6 @@ export function SectorCompositionChart({ data }: { data: SectorPoint[] }) {
           </div>
         ))}
       </div>
-      {largest ? <div className="chart-annotation">The largest exposure is currently {largest.sector.toLowerCase()}, which helps define the basket's overall character.</div> : null}
     </div>
   );
 }

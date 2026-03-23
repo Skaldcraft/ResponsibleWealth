@@ -39,7 +39,7 @@ export async function getSiteSummary() {
   );
 }
 
-export async function getBasketOverview() {
+export async function getBasketOverview(options?: { sortBy?: "name" | "price"; order?: "asc" | "desc" }) {
   return withFallback(
     async () => {
       const basket = await prisma.basket.findFirst({
@@ -65,7 +65,7 @@ export async function getBasketOverview() {
         throw new Error("No basket");
       }
 
-      const companies = basket.members.map(({ company }) => ({
+      let companies = basket.members.map(({ company }) => ({
         ticker: company.ticker,
         slug: company.slug,
         name: company.name,
@@ -98,6 +98,27 @@ export async function getBasketOverview() {
         }
       }));
 
+      // Apply sorting if requested
+      if (options?.sortBy) {
+        const { sortBy, order = "asc" } = options;
+        companies.sort((a, b) => {
+          let aVal: string | number;
+          let bVal: string | number;
+
+          if (sortBy === "name") {
+            aVal = a.name.toLowerCase();
+            bVal = b.name.toLowerCase();
+          } else {
+            aVal = a.snapshot.closePrice;
+            bVal = b.snapshot.closePrice;
+          }
+
+          if (aVal === bVal) return 0;
+          const comparison = aVal > bVal ? 1 : -1;
+          return order === "asc" ? comparison : -comparison;
+        });
+      }
+
       const averageMonthReturn = companies.length
         ? companies.reduce((sum, company) => sum + company.snapshot.monthReturnPct, 0) / companies.length
         : 0;
@@ -121,12 +142,34 @@ export async function getBasketOverview() {
         averageMonthReturn
       };
     },
-    () => ({
-      basket: basketSeed,
-      benchmark: benchmarkSeed,
-      companies: seedCompanies,
-      averageMonthReturn: seedCompanies.reduce((sum, company) => sum + company.snapshot.monthReturnPct, 0) / seedCompanies.length
-    })
+    async () => {
+      let companies = [...seedCompanies];
+      if (options?.sortBy) {
+        const { sortBy, order = "asc" } = options;
+        companies.sort((a, b) => {
+          let aVal: string | number;
+          let bVal: string | number;
+
+          if (sortBy === "name") {
+            aVal = a.name.toLowerCase();
+            bVal = b.name.toLowerCase();
+          } else {
+            aVal = a.snapshot.closePrice;
+            bVal = b.snapshot.closePrice;
+          }
+
+          if (aVal === bVal) return 0;
+          const comparison = aVal > bVal ? 1 : -1;
+          return order === "asc" ? comparison : -comparison;
+        });
+      }
+      return {
+        basket: basketSeed,
+        benchmark: benchmarkSeed,
+        companies: companies,
+        averageMonthReturn: companies.reduce((sum, company) => sum + company.snapshot.monthReturnPct, 0) / companies.length
+      };
+    }
   );
 }
 
@@ -343,15 +386,36 @@ export async function getSourcesDirectory() {
       const companies = await prisma.company.findMany({
         where: { active: true },
         orderBy: { ticker: "asc" },
-        include: { sources: { where: { active: true }, orderBy: { sortOrder: "asc" } } }
+        include: { 
+          sources: { where: { active: true }, orderBy: { sortOrder: "asc" } },
+          esgProfile: true
+        }
       });
       return companies.map((company) => ({
         ticker: company.ticker,
         name: company.name,
+        country: company.country,
+        sector: company.sector,
+        shortDescription: company.shortDescription,
+        rationaleShort: company.esgProfile?.rationaleShort ?? "",
+        rationaleLong: company.esgProfile?.rationaleLong ?? "",
+        strengths: company.esgProfile?.strengths ?? "",
+        concerns: company.esgProfile?.concerns ?? "",
         sources: company.sources.map((source) => ({ type: source.type, label: source.label, url: source.url }))
       }));
     },
-    () => seedCompanies.map((company) => ({ ticker: company.ticker, name: company.name, sources: company.sources }))
+    () => seedCompanies.map((company) => ({ 
+      ticker: company.ticker, 
+      name: company.name, 
+      country: company.country,
+      sector: company.sector,
+      shortDescription: company.shortDescription,
+      rationaleShort: company.rationaleShort,
+      rationaleLong: company.rationaleLong,
+      strengths: company.strengths,
+      concerns: company.concerns,
+      sources: company.sources 
+    }))
   );
 }
 

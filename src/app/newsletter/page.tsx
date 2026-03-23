@@ -8,10 +8,19 @@ export default async function NewsletterArchivePage() {
   return (
     <div className="section">
       <section className="hero">
-        <div className="eyebrow">Newsletter archive</div>
-        <h1>Monthly research digests</h1>
-        <p className="lede">Each issue recaps the basket in a friendlier, calmer tone and focuses on developments that actually matter over the medium term.</p>
-        <NewsletterSignup />
+        <div className="hero__header">
+          <div className="hero__title">
+            <div className="eyebrow">Newsletter archive</div>
+            <h1>Monthly research digests</h1>
+          </div>
+          <div className="hero__visual">🗞️</div>
+        </div>
+        <div className="hero__body">
+          <p className="lede">
+            Each issue recaps the basket in a friendly, calm tone and focuses on developments that truly matter over the medium term.
+          </p>
+          <NewsletterSignup />
+        </div>
       </section>
       <section className="grid-2">
         {archive.map((issue: { slug: string; title: string; preheader: string; publishedAt: string }) => (

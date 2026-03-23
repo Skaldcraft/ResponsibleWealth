@@ -2,13 +2,18 @@ import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { NewsletterSignup } from "@/components/newsletter-signup";
 import { PerformanceComparisonChart, SectorCompositionChart } from "@/components/research-charts";
+import { SortableBasketTable } from "@/components/sortable-basket-table";
 import { getBasketOverview, getRecentChanges } from "@/lib/server/repository";
 import { formatDate, formatPercent } from "@/lib/utils";
 
-export async function BasketPageContent() {
-  const [overview, recentChanges] = await Promise.all([getBasketOverview(), getRecentChanges()]);
+export async function BasketPageContent({ sortBy, order }: { sortBy?: "name" | "price"; order?: "asc" | "desc" }) {
+  const [overview, recentChanges] = await Promise.all([
+    getBasketOverview({ sortBy, order }),
+    getRecentChanges()
+  ]);
   const featuredChanges = recentChanges.slice(0, 3);
   const latestAsOfDate = overview.companies[0]?.snapshot.asOfDate ?? overview.benchmark.snapshot.asOfDate;
+  
   const performanceData = [
     {
       window: "1M",
@@ -18,36 +23,77 @@ export async function BasketPageContent() {
     },
     {
       window: "YTD",
-      basket: Number((overview.companies.reduce((sum, company) => sum + company.snapshot.ytdReturnPct, 0) / Math.max(overview.companies.length, 1)).toFixed(1)),
+      basket: Number((overview.companies.reduce((sum, company) => sum + (company.snapshot?.ytdReturnPct ?? 0), 0) / Math.max(overview.companies.length, 1)).toFixed(1)),
       benchmark: overview.benchmark.snapshot.ytdReturnPct,
       broaderHalo: 6.1
     },
     {
       window: "1Y",
-      basket: Number((overview.companies.reduce((sum, company) => sum + company.snapshot.oneYearReturnPct, 0) / Math.max(overview.companies.length, 1)).toFixed(1)),
+      basket: Number((overview.companies.reduce((sum, company) => sum + (company.snapshot?.oneYearReturnPct ?? 0), 0) / Math.max(overview.companies.length, 1)).toFixed(1)),
       benchmark: overview.benchmark.snapshot.oneYearReturnPct,
       broaderHalo: 11.6
     }
   ];
-  const sectorData = Object.entries(
-    overview.companies.reduce<Record<string, number>>((accumulator, company) => {
-      accumulator[company.sector] = (accumulator[company.sector] ?? 0) + 1;
-      return accumulator;
-    }, {})
-  )
+
+  const SECTOR_MAPPING: Record<string, string> = {
+    // 1. Energy Generation & Grid Infrastructure
+    "Renewable Utilities": "Energy Generation & Grid Infrastructure",
+    "Renewables": "Energy Generation & Grid Infrastructure",
+    "Offshore Wind": "Energy Generation & Grid Infrastructure",
+    "Utilities": "Energy Generation & Grid Infrastructure",
+    "Regulated Utilities": "Energy Generation & Grid Infrastructure",
+    "Energy Efficiency": "Energy Generation & Grid Infrastructure",
+    "Electricity Transmission": "Energy Generation & Grid Infrastructure",
+    
+    // 2. Water & Environmental Solutions
+    "Water Infrastructure": "Water & Environmental Solutions",
+    "Water Technology": "Water & Environmental Solutions",
+    "Water and Sustainability Solutions": "Water & Environmental Solutions",
+    "Circular Economy": "Water & Environmental Solutions",
+    
+    // 3. Transport & Mobility Infrastructure
+    "Rail Infrastructure": "Transport & Mobility Infrastructure",
+    "Airport & Transport Infrastructure": "Transport & Mobility Infrastructure",
+    
+    // 4. Digital & Communications Infrastructure
+    "Telecom Infrastructure": "Digital & Communications Infrastructure",
+    
+    // 5. Real Estate & Storage
+    "Storage REIT": "Real Estate & Storage",
+    "Sustainable Logistics REIT": "Real Estate & Storage",
+    
+    // Fallback/Essential (If needed - merging Essential Services into Real Estate as a physical holding)
+    "Essential Services": "Real Estate & Storage"
+  };
+
+  const sectorDataMap = overview.companies.reduce<Record<string, number>>((accumulator, company) => {
+    const group = SECTOR_MAPPING[company.sector] || "Other Infrastructure";
+    accumulator[group] = (accumulator[group] ?? 0) + 1;
+    return accumulator;
+  }, {});
+
+  const sectorData = Object.entries(sectorDataMap)
     .map(([sector, count]) => ({ sector, count }))
     .sort((a, b) => b.count - a.count || a.sector.localeCompare(b.sector));
 
   return (
     <div className="section">
       <section className="hero">
-        <div className="eyebrow">HALO ESG basket</div>
-        <h1>{overview.basket.name}</h1>
-        <p className="lede">
-          A basket of durable, real-world companies followed through a practical responsible-investing lens.
-          {" "}
-          <Link className="inline-link" href="/methodology">See Our Approach</Link>
-        </p>
+        <div className="hero__header">
+          <div className="hero__title">
+            <div className="eyebrow">HALO ESG basket</div>
+            <h1>{overview.basket.name}</h1>
+          </div>
+          <div className="hero__visual">🏛️</div>
+        </div>
+        <div className="hero__body">
+          <p className="lede">
+            A basket of durable, real-world companies followed through a practical responsible-investing lens.
+          </p>
+          <p className="lede">
+            The goal is to monitor steady long-term themes. For more details on our selection criteria, visit our <Link className="inline-link" href="/method-and-purpose">Method and Purpose</Link>.
+          </p>
+        </div>
         <div className="grid-4">
           <div className="card stat"><span>Companies</span><strong>{overview.companies.length}</strong></div>
           <div className="card stat"><span>Average 1M return</span><strong>{formatPercent(overview.averageMonthReturn)}</strong></div>
@@ -82,25 +128,13 @@ export async function BasketPageContent() {
                   <div className="eyebrow">Constituents</div>
                   <h2>Current basket members</h2>
                 </div>
-                <p className="muted">This table keeps the focus on the details you are most likely to revisit: category, sector, and medium-term performance context.</p>
+                <p className="muted">This table keeps the focus on the details you are most likely to revisit: sector and performance context. Click "Company" or "Price" to change the sort order.</p>
               </div>
-              <table>
-                <thead><tr><th>Ticker</th><th>Company</th><th>Sector</th><th>Category</th><th>Price</th><th>1D</th><th>1M</th><th>1Y</th></tr></thead>
-                <tbody>
-                  {overview.companies.map((company: { ticker: string; name: string; sector: string; esgCategory: string; snapshot: { currency: string; closePrice: number; dayChangePct: number; monthReturnPct: number; oneYearReturnPct: number } }) => (
-                    <tr key={company.ticker}>
-                      <td><Link href={`/companies/${company.ticker.toLowerCase()}`}>{company.ticker}</Link></td>
-                      <td>{company.name}</td>
-                      <td>{company.sector}</td>
-                      <td><span className={`pill ${company.esgCategory}`}>{company.esgCategory}</span></td>
-                      <td>{company.snapshot.currency} {company.snapshot.closePrice}</td>
-                      <td>{formatPercent(company.snapshot.dayChangePct)}</td>
-                      <td>{formatPercent(company.snapshot.monthReturnPct)}</td>
-                      <td>{formatPercent(company.snapshot.oneYearReturnPct)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+              <SortableBasketTable 
+                companies={overview.companies}
+                activeSort={sortBy}
+                activeOrder={order}
+              />
             </>
           ) : (
             <div className="card">

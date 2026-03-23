@@ -85,9 +85,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Renewables leadership, long-duration assets, recurring cash flow.",
     concerns: "Execution risk on projects and pace of the energy transition.",
     watchpoints: ["Track renewable capacity additions.", "Monitor project execution and financing conditions.", "Watch policy and grid investment support."],
-    sustainabilityUrl: "https://www.nexteraenergy.com/sustainability.html",
+    sustainabilityUrl: "https://www.investor.nexteraenergy.com/sustainability/sustainability-resources/",
     marketUrl: "https://finance.yahoo.com/quote/NEE/",
-    newsUrl: "https://www.investor.nexteraenergy.com/",
+    newsUrl: "https://newsroom.nexteraenergy.com/",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 61.42, dayChangePct: 0.8, monthReturnPct: 2.4, ytdReturnPct: 3.8, oneYearReturnPct: 9.6, isDelayed: true }
   }),
   makeCompany({
@@ -110,6 +110,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Monitor grid modernization spending.", "Track regulatory outcomes.", "Watch decarbonization milestones."],
     sustainabilityUrl: "https://www.exeloncorp.com/sustainability",
     marketUrl: "https://finance.yahoo.com/quote/EXC/",
+    newsUrl: "https://www.exeloncorp.com/newsroom",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 38.75, dayChangePct: 0.2, monthReturnPct: 1.1, ytdReturnPct: 1.9, oneYearReturnPct: 6.2, isDelayed: true }
   }),
   makeCompany({
@@ -132,6 +133,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Generation mix changes.", "Capital plan execution.", "Regulatory settlements."],
     sustainabilityUrl: "https://www.duke-energy.com/our-company/sustainability",
     marketUrl: "https://finance.yahoo.com/quote/DUK/",
+    newsUrl: "https://news.duke-energy.com/",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 96.03, dayChangePct: -0.3, monthReturnPct: 0.9, ytdReturnPct: 2.1, oneYearReturnPct: 4.4, isDelayed: true }
   }),
   makeCompany({
@@ -154,6 +156,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Capex discipline.", "Transition milestones.", "Operational reliability."],
     sustainabilityUrl: "https://www.southerncompany.com/sustainability.html",
     marketUrl: "https://finance.yahoo.com/quote/SO/",
+    newsUrl: "https://www.southerncompany.com/newsroom.html",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 70.11, dayChangePct: 0.4, monthReturnPct: 1.4, ytdReturnPct: 1.8, oneYearReturnPct: 5.2, isDelayed: true }
   }),
   makeCompany({
@@ -199,6 +202,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Project pipeline economics.", "Capital discipline.", "Offshore demand and permitting."],
     sustainabilityUrl: "https://orsted.com/en/sustainability",
     marketUrl: "https://finance.yahoo.com/quote/ORSTED.CO/",
+    newsUrl: "https://orsted.com/en/media/news/",
     snapshot: { asOfDate: date, currency: "DKK", closePrice: 412.5, dayChangePct: -0.5, monthReturnPct: -2.1, ytdReturnPct: -1.2, oneYearReturnPct: 1.7, isDelayed: true }
   }),
   makeCompany({
@@ -219,8 +223,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Renewable asset base, geographic diversification, clear thematic fit.",
     concerns: "Power pricing and project returns.",
     watchpoints: ["Capacity additions.", "Asset profitability.", "Power market conditions."],
-    sustainabilityUrl: "https://www.edpr.com/en/sustainability",
+    sustainabilityUrl: "https://edp.com/en/responsible-action/environment/",
     marketUrl: "https://finance.yahoo.com/quote/EDPR.LS/",
+    newsUrl: "https://edp.com/en/media/news/",
     snapshot: { asOfDate: date, currency: "EUR", closePrice: 10.82, dayChangePct: 0.1, monthReturnPct: 1.7, ytdReturnPct: 2.3, oneYearReturnPct: 7.1, isDelayed: true }
   }),
   makeCompany({
@@ -241,8 +246,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Essential service, durable networks, clear responsible-investing relevance.",
     concerns: "Regulatory outcomes and affordability pressures.",
     watchpoints: ["Rate cases.", "Infrastructure investment pipeline.", "Water quality and resilience projects."],
-    sustainabilityUrl: "https://www.amwater.com/corp/sustainability/",
+    sustainabilityUrl: "https://ir.amwater.com/sustainability/",
     marketUrl: "https://finance.yahoo.com/quote/AWK/",
+    newsUrl: "https://newsroom.amwater.com/",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 122.88, dayChangePct: 0.5, monthReturnPct: 2.0, ytdReturnPct: 3.0, oneYearReturnPct: 8.5, isDelayed: true }
   }),
   makeCompany({
@@ -286,8 +292,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Water efficiency, industrial customers, durable operating footprint.",
     concerns: "Input costs and industrial cycles.",
     watchpoints: ["Customer demand trends.", "Water-efficiency milestones.", "Margin resilience."],
-    sustainabilityUrl: "https://www.ecolab.com/corporate-responsibility",
+    sustainabilityUrl: "https://www.ecolab.com/corporate-responsibility/environment/",
     marketUrl: "https://finance.yahoo.com/quote/ECL/",
+    newsUrl: "https://www.ecolab.com/news",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 218.55, dayChangePct: 0.7, monthReturnPct: 2.7, ytdReturnPct: 4.8, oneYearReturnPct: 11.3, isDelayed: true }
   }),
   makeCompany({
@@ -354,8 +361,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Network effects, durable rail assets, freight efficiency.",
     concerns: "Volumes, regulation, and service execution.",
     watchpoints: ["Freight volume trends.", "Operational efficiency.", "Capital return vs reinvestment balance."],
-    sustainabilityUrl: "https://www.up.com/customers/sustainability/index.htm",
+    sustainabilityUrl: "https://www.up.com/communities",
     marketUrl: "https://finance.yahoo.com/quote/UNP/",
+    newsUrl: "https://www.up.com/news",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 239.88, dayChangePct: -0.1, monthReturnPct: 1.6, ytdReturnPct: 2.8, oneYearReturnPct: 7.8, isDelayed: true }
   }),
   makeCompany({
@@ -376,8 +384,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Durable network assets, lower-emission freight relevance, essential transport role.",
     concerns: "Freight cycles and execution.",
     watchpoints: ["Cross-border volume trends.", "Network productivity.", "Operating margins."],
-    sustainabilityUrl: "https://www.cn.ca/en/delivering-responsibly/",
+    sustainabilityUrl: "https://investors.duke-energy.com/esg/governance-documents/",
     marketUrl: "https://finance.yahoo.com/quote/CNI/",
+    newsUrl: "https://www.cn.ca/en/media/news/",
     snapshot: { asOfDate: date, currency: "CAD", closePrice: 168.42, dayChangePct: 0.2, monthReturnPct: 1.3, ytdReturnPct: 2.4, oneYearReturnPct: 6.9, isDelayed: true }
   }),
   makeCompany({
@@ -398,8 +407,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Prime logistics assets, scale, durable cash flow.",
     concerns: "Rate sensitivity and property cycles.",
     watchpoints: ["Occupancy trends.", "Rent growth.", "Balance-sheet discipline."],
-    sustainabilityUrl: "https://www.prologis.com/esg",
+    sustainabilityUrl: "https://www.prologis.com/impact-sustainability/",
     marketUrl: "https://finance.yahoo.com/quote/PLD/",
+    newsUrl: "https://www.prologis.com/insights-news/",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 127.12, dayChangePct: 0.9, monthReturnPct: 3.5, ytdReturnPct: 4.9, oneYearReturnPct: 12.4, isDelayed: true }
   }),
   makeCompany({
@@ -420,8 +430,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Recurring revenue, durable assets, simple business model.",
     concerns: "Rate sensitivity and local market conditions.",
     watchpoints: ["Occupancy.", "Rental rate trends.", "Development discipline."],
-    sustainabilityUrl: "https://www.publicstorage.com/company/sustainability",
+    sustainabilityUrl: "https://www.publicstorage.com/solar-sustainability/solar-sustainability.html/",
     marketUrl: "https://finance.yahoo.com/quote/PSA/",
+    newsUrl: "https://investors.publicstorage.com/news-releases/default.aspx",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 282.66, dayChangePct: 0.4, monthReturnPct: 2.2, ytdReturnPct: 3.3, oneYearReturnPct: 8.8, isDelayed: true }
   }),
   makeCompany({
@@ -442,8 +453,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Essential service, recurring demand, durability.",
     concerns: "Reputation and demand normalization.",
     watchpoints: ["Margin trends.", "Long-term service demand.", "Capital allocation."],
-    sustainabilityUrl: "https://investors.sci-corp.com/",
+    sustainabilityUrl: "https://www.sci-corp.com/about/responsibility",
     marketUrl: "https://finance.yahoo.com/quote/SCI/",
+    newsUrl: "https://news.sci-corp.com/news-releases",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 74.9, dayChangePct: 0.3, monthReturnPct: 1.2, ytdReturnPct: 2.6, oneYearReturnPct: 6.1, isDelayed: true }
   }),
   makeCompany({
@@ -464,8 +476,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Recurring service demand, public-health utility, lower obsolescence.",
     concerns: "Valuation and execution.",
     watchpoints: ["Service demand trends.", "Margin expansion.", "Operational consistency."],
-    sustainabilityUrl: "https://www.rollins.com/investors/",
+    sustainabilityUrl: "https://www.rollins.com/our-culture/our-impact/",
     marketUrl: "https://finance.yahoo.com/quote/ROL/",
+    newsUrl: "https://www.rollins.com/investors/press-releases",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 48.33, dayChangePct: 0.5, monthReturnPct: 2.8, ytdReturnPct: 4.1, oneYearReturnPct: 12.0, isDelayed: true }
   }),
   makeCompany({
@@ -488,7 +501,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Organic tenant additions.", "Leverage and deleveraging trajectory.", "5G build-out contribution to tower demand."],
     sustainabilityUrl: "https://www.americantower.com/sustainability/",
     marketUrl: "https://finance.yahoo.com/quote/AMT/",
-    newsUrl: "https://www.americantower.com/investor-relations/",
+    newsUrl: "https://www.americantower.com/media-hub/",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 176.79, dayChangePct: -3.3, monthReturnPct: -2.8, ytdReturnPct: -1.5, oneYearReturnPct: 4.2, isDelayed: true }
   }),
   makeCompany({
@@ -509,9 +522,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "US tower portfolio, essential wireless infrastructure, recurring revenue model, densification tailwinds.",
     concerns: "Fiber divestiture execution, interest-rate exposure, and concentrated US footprint.",
     watchpoints: ["Fiber business divestiture timeline.", "Small-cell deployment pace.", "Balance-sheet and dividend sustainability."],
-    sustainabilityUrl: "https://www.crowncastle.com/responsibility",
+    sustainabilityUrl: "https://www.crowncastle.com/sustainability/",
     marketUrl: "https://finance.yahoo.com/quote/CCI/",
-    newsUrl: "https://investor.crowncastle.com/",
+    newsUrl: "https://www.crowncastle.com/news/",
     snapshot: { asOfDate: date, currency: "USD", closePrice: 82.36, dayChangePct: -3.2, monthReturnPct: -4.1, ytdReturnPct: -6.8, oneYearReturnPct: -2.5, isDelayed: true }
   }),
   makeCompany({
@@ -532,7 +545,7 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Global water and waste infrastructure, essential public-service contracts, scale, and circular-economy positioning.",
     concerns: "Regulatory and political risk in concession markets, integration complexity after Suez acquisition.",
     watchpoints: ["Synergies from Suez integration.", "Municipal contract renewals and pricing.", "Water-stress adaptation investments."],
-    sustainabilityUrl: "https://www.veolia.com/en/our-commitments/sustainable-development",
+    sustainabilityUrl: "https://www.veolia.com/en/veolia-group/csr-multifaceted-performance",
     marketUrl: "https://finance.yahoo.com/quote/VEOEY/",
     newsUrl: "https://www.veolia.com/en/newsroom",
     snapshot: { asOfDate: date, currency: "EUR", closePrice: 31.10, dayChangePct: -1.6, monthReturnPct: -3.2, ytdReturnPct: 2.4, oneYearReturnPct: 10.8, isDelayed: true }
@@ -557,7 +570,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Grid modernization capex execution.", "Regulatory framework updates.", "Interconnector and renewable integration projects."],
     sustainabilityUrl: "https://www.terna.it/en/sustainability",
     marketUrl: "https://finance.yahoo.com/quote/TRN.MI/",
-    newsUrl: "https://www.terna.it/en/media",
+    newsUrl: "https://www.terna.it/en/media/",
     snapshot: { asOfDate: date, currency: "EUR", closePrice: 9.80, dayChangePct: -1.1, monthReturnPct: -1.6, ytdReturnPct: 1.8, oneYearReturnPct: 7.4, isDelayed: true }
   }),
   makeCompany({
@@ -580,6 +593,7 @@ export const seedCompanies: SeedCompany[] = [
     watchpoints: ["Regulatory WACC updates.", "Renewables integration investment.", "Telecom subsidiary strategy."],
     sustainabilityUrl: "https://www.redeia.com/en/sustainability",
     marketUrl: "https://finance.yahoo.com/quote/RED.MC/",
+    newsUrl: "https://www.redeia.com/en/press-office/news/",
     snapshot: { asOfDate: date, currency: "EUR", closePrice: 14.90, dayChangePct: 0.1, monthReturnPct: -0.8, ytdReturnPct: 1.2, oneYearReturnPct: 5.6, isDelayed: true }
   }),
   makeCompany({
@@ -600,9 +614,9 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Flagship airport concessions, global toll-road portfolio, long-duration concessions, essential transport demand.",
     concerns: "Concession renewal risk, construction cyclicality, Amsterdam listing liquidity.",
     watchpoints: ["Heathrow concession developments.", "Managed Lanes traffic recovery.", "Capital recycling and asset rotation strategy."],
-    sustainabilityUrl: "https://www.ferrovial.com/en/sustainability/",
+    sustainabilityUrl: "https://www.ferrovial.com/en/sustainability/corporate-social-responsibility/csr-plan/",
     marketUrl: "https://finance.yahoo.com/quote/FER/",
-    newsUrl: "https://www.ferrovial.com/en/press-room/",
+    newsUrl: "https://newsroom.ferrovial.com/en/",
     snapshot: { asOfDate: date, currency: "EUR", closePrice: 53.44, dayChangePct: 0.5, monthReturnPct: -5.2, ytdReturnPct: -8.1, oneYearReturnPct: 3.8, isDelayed: true }
   })
 ];

@@ -15,9 +15,21 @@ export default async function ComparePage() {
   return (
     <div className="section">
       <section className="hero">
-        <div className="eyebrow">Compare</div>
-        <h1>Medium-term comparison, not intraday noise</h1>
-        <p className="lede">These comparisons illustrate how the basket changes over time compared with a benchmark and the larger HALO group. The emphasis is on long-term trends rather than short-term signals.</p>
+        <div className="hero__header">
+          <div className="hero__title">
+            <div className="eyebrow">Compare</div>
+            <h1>Medium-term comparison, not intraday noise</h1>
+          </div>
+          <div className="hero__visual">⚖️</div>
+        </div>
+        <div className="hero__body">
+          <p className="lede">
+            These comparisons illustrate how the basket moves over time compared with both a selected benchmark and the broader HALO group.
+          </p>
+          <p className="lede">
+            The emphasis here is on understanding long-term trends and relative performance rather than reacting to temporary market signals.
+          </p>
+        </div>
       </section>
       <Disclaimer compact />
       <section className="card">

@@ -9,11 +9,21 @@ export default async function ChangesPage() {
   return (
     <div className="section">
       <section className="hero">
-        <div className="eyebrow">Recent changes</div>
-        <h1>How the basket evolves over time</h1>
-        <p className="lede">
-          This page helps make the research process transparent. It tracks how we reassess, update, and place companies in context over time instead of treating them as fixed picks.
-        </p>
+        <div className="hero__header">
+          <div className="hero__title">
+            <div className="eyebrow">Recent changes</div>
+            <h1>How the basket evolves over time</h1>
+          </div>
+          <div className="hero__visual">📜</div>
+        </div>
+        <div className="hero__body">
+          <p className="lede">
+            This page helps make the research process transparent across months and years.
+          </p>
+          <p className="lede">
+            It tracks how we reassess, update, and place companies in context over time instead of treating them as fixed investment picks.
+          </p>
+        </div>
       </section>
 
       <Disclaimer compact />
