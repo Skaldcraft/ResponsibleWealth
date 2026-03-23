@@ -15,7 +15,7 @@ Responsible Wealth publishes the **HALO ESG Index** — a curated basket of comp
 | **Database** | PostgreSQL (via [Supabase](https://supabase.com/)) |
 | **ORM** | [Prisma 6](https://www.prisma.io/) |
 | **Styling** | Vanilla CSS with custom design tokens |
-| **Charts** | [Recharts](https://recharts.org/) |
+| **Charts** | Custom SVG sparklines and trend visuals |
 | **Email** | [SendPulse](https://sendpulse.com/) |
 | **Testing** | [Vitest](https://vitest.dev/) |
 

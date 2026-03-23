@@ -16,12 +16,11 @@
   },
   "dependencies": {
     "@prisma/client": "^6.5.0",
+    "chart.js": "^4.5.1",
     "jose": "^6.0.8",
     "next": "^15.2.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "recharts": "^3.8.0",
-    "resend": "^4.1.2",
     "zod": "^3.24.2"
   },
   "devDependencies": {
