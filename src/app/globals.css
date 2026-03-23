@@ -339,6 +339,152 @@ select {
 .table-wrap--changes thead th:nth-child(6),
 .table-wrap--changes tbody td:nth-child(6) { width: 16%; }
 
+.changes-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+.changes-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.table-wrap--changes-matrix { padding: 26px; }
+.table-wrap--changes-matrix table { width: 100%; min-width: 780px; border-collapse: collapse; table-layout: fixed; }
+.table-wrap--changes-matrix th,
+.table-wrap--changes-matrix td {
+  padding: 12px 10px;
+  border-bottom: 1px solid var(--line);
+  text-align: center;
+  vertical-align: middle;
+  font-size: 0.94rem;
+}
+.table-wrap--changes-matrix thead th {
+  font-size: 0.76rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.table-wrap--changes-matrix thead th:first-child,
+.table-wrap--changes-matrix tbody td:first-child {
+  width: 34%;
+  text-align: left;
+}
+.table-wrap--changes-matrix thead th:nth-child(2),
+.table-wrap--changes-matrix tbody td:nth-child(2) {
+  width: 10%;
+}
+.table-wrap--changes-matrix tbody tr:nth-child(2n) { background: rgba(242, 234, 217, 0.22); }
+.table-wrap--changes-matrix tbody tr:hover { background: rgba(223, 234, 221, 0.28); }
+
+.changes-cell {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 999px;
+  font-size: 0.92rem;
+  line-height: 1;
+  border: 1px solid transparent;
+}
+.changes-cell--added {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(45, 106, 79, 0.15);
+  font-weight: 700;
+}
+.changes-cell--maintained {
+  background: rgba(242, 234, 217, 0.7);
+  color: var(--muted);
+}
+.changes-cell--removed {
+  background: #f1d9cf;
+  color: #6d4026;
+  border-color: rgba(109, 64, 38, 0.12);
+  font-weight: 700;
+}
+.changes-cell--inactive {
+  background: transparent;
+  color: transparent;
+  border-color: rgba(213, 204, 185, 0.28);
+}
+
+.trend-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+.trend-card { gap: 12px; }
+.trend-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+.trend-card__header h3 { font-size: 1rem; margin: 0; }
+.trend-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 70px;
+  padding: 6px 10px;
+  border-radius: 999px;
+  font-size: 0.82rem;
+  border: 1px solid transparent;
+}
+.trend-chip--up {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: rgba(45, 106, 79, 0.15);
+}
+.trend-chip--down {
+  background: #f1d9cf;
+  color: #6d4026;
+  border-color: rgba(109, 64, 38, 0.12);
+}
+.sparkline-shell {
+  background: rgba(242, 234, 217, 0.45);
+  border: 1px solid var(--line-soft);
+  border-radius: 12px;
+  padding: 8px;
+}
+.sparkline-svg { display: block; width: 100%; height: auto; }
+.sparkline-months {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 0 4px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.03em;
+}
+.sparkline-guide {
+  stroke: #d8cfbe;
+  stroke-dasharray: 5 5;
+}
+.sparkline-line {
+  fill: none;
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.sparkline-line--up { stroke: #2d6a4f; }
+.sparkline-line--down { stroke: #8b4a2e; }
+.sparkline-dot {
+  fill: #fffaf2;
+  stroke: #2f4f45;
+  stroke-width: 1.4;
+}
+.trend-card__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
 .status-pill { text-transform: capitalize; }
 .status-pill--added { background: var(--accent-soft); color: var(--accent); }
 .status-pill--maintained { background: var(--surface-strong); color: var(--ink); }
@@ -454,7 +600,12 @@ select {
   .table-wrap--editorial th,
   .table-wrap--changes,
   .table-wrap--changes td,
-  .table-wrap--changes th { padding: 12px 10px; font-size: 0.9rem; }
+  .table-wrap--changes th,
+  .table-wrap--changes-matrix,
+  .table-wrap--changes-matrix td,
+  .table-wrap--changes-matrix th { padding: 12px 10px; font-size: 0.9rem; }
+  .changes-cell { width: 1.8rem; height: 1.8rem; }
+  .trend-grid { grid-template-columns: 1fr; }
 }
 
 @media (prefers-reduced-motion: reduce) {

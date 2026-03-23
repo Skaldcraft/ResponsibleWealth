@@ -86,8 +86,8 @@ export default async function MethodAndPurposePage() {
             <p style={{ fontSize: '0.94rem' }}>Understand how each business fits the HALO and ESG ideas, and see its recent thematic updates on its dedicated page.</p>
           </div>
           <div>
-            <h3 style={{ fontSize: '1.2rem' }}>3. Check Recent Changes</h3>
-            <p style={{ fontSize: '0.94rem' }}>Visit the <Link href="/changes" className="inline-link" style={{ fontWeight: 600 }}>recent changes</Link> page to see developments that matter over months, not days.</p>
+            <h3 style={{ fontSize: '1.2rem' }}>3. Check Company Trend Overview</h3>
+            <p style={{ fontSize: '0.94rem' }}>Visit the <Link href="/changes" className="inline-link" style={{ fontWeight: 600 }}>company trend overview</Link> page to get a quick sense of company behavior over months, not days.</p>
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem' }}>4. Verify Official Sources</h3>

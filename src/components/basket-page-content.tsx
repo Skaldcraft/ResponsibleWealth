@@ -154,7 +154,7 @@ export async function BasketPageContent({ sortBy, order }: { sortBy?: "name" | "
               <div className="eyebrow">What changed recently</div>
               <h2>Recent developments shaping the basket</h2>
             </div>
-            <Link className="button secondary" href="/changes">View all changes</Link>
+            <Link className="button secondary" href="/changes">View company trend overview</Link>
           </div>
           <div className="grid-3">
             {featuredChanges.map((change: { companyName: string; ticker: string; title: string; summary: string; effectiveDate: string; updateType: string }) => (

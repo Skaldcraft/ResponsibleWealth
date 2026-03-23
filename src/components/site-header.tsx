@@ -12,7 +12,7 @@ export function SiteHeader() {
         </div>
         <nav className="nav" aria-label="Main navigation">
           <Link href="/compare">Compare</Link>
-          <Link href="/changes">Recent changes</Link>
+          <Link href="/changes">Company Trend Overview</Link>
           <Link href="/method-and-purpose">Method and Purpose</Link>
           <Link href="/newsletter">Newsletter</Link>
           <Link href="/company-profiles">Company profiles</Link>

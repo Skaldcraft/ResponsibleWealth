@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
-import type { Company, BasketStatus } from "@/types/company";
+import type { BasketStatus } from "@/types/company";
 import { companies } from "@/data/companies";
 import { basketChanges, type MonthlyChange } from "@/data/basketChanges";
-import { formatCountry } from "@/lib/utils";
+import { monthlyCloses } from "@/data/monthly-closes";
+import { prisma } from "@/lib/server/prisma";
 
 const MONTH_LABELS = [
   "",
@@ -21,10 +22,9 @@ const MONTH_LABELS = [
   "December"
 ];
 
-function statusLabel(status: BasketStatus) {
+function statusLabel(status: Exclude<BasketStatus, "inactive">) {
   if (status === "added") return "Added";
   if (status === "removed") return "Removed";
-  if (status === "inactive") return "Inactive";
   return "Maintained";
 }
 
@@ -52,6 +52,146 @@ function getStatusByMonthAndTicker(year: number, allChanges: MonthlyChange[]) {
   return { months, perMonth };
 }
 
+function buildIndexedSeries(months: number[], statusMap: Record<string, BasketStatus>, ticker: string, monthlyCloseMap: Record<string, number>) {
+  const values: Array<number | null> = [];
+  let baseClose: number | null = null;
+
+  for (const month of months) {
+    const status = statusMap[ticker.toUpperCase()] ?? "inactive";
+    const resolvedStatus = statusMap[`${ticker.toUpperCase()}-${month}`] ?? status;
+    const monthStatus = (resolvedStatus as BasketStatus) ?? "inactive";
+
+    if (monthStatus === "inactive") {
+      values.push(null);
+      continue;
+    }
+
+    const close = monthlyCloseMap[`${ticker.toUpperCase()}-${month}`];
+    if (typeof close !== "number") {
+      values.push(null);
+      continue;
+    }
+
+    if (baseClose == null) {
+      baseClose = close;
+      values.push(100);
+      continue;
+    }
+
+    values.push(Number(((close / Math.max(baseClose, 0.0001)) * 100).toFixed(2)));
+  }
+
+  return values;
+}
+
+function buildSparklinePath(values: Array<number | null>, width: number, height: number, padding: number, minimum: number, maximum: number) {
+  const innerWidth = width - padding * 2;
+  const innerHeight = height - padding * 2;
+  const denominator = Math.max(maximum - minimum, 1);
+
+  let hasStarted = false;
+  let path = "";
+
+  for (const [index, value] of values.entries()) {
+    if (value == null) {
+      hasStarted = false;
+      continue;
+    }
+
+    const x = padding + (innerWidth * index) / Math.max(values.length - 1, 1);
+    const y = padding + innerHeight - ((value - minimum) / denominator) * innerHeight;
+    path += `${hasStarted ? " L" : " M"}${x.toFixed(2)} ${y.toFixed(2)}`;
+    hasStarted = true;
+  }
+
+  return path.trim();
+}
+
+function getSeriesStats(values: Array<number | null>) {
+  const concreteValues = values.filter((value): value is number => typeof value === "number");
+  const start = concreteValues[0] ?? 100;
+  const end = concreteValues[concreteValues.length - 1] ?? start;
+  const delta = Number((((end - start) / Math.max(start, 1)) * 100).toFixed(1));
+  return { start, end, delta, points: concreteValues.length };
+}
+
+async function getMonthlyCloseMap(year: number, months: number[]) {
+  const fallback = (() => {
+    const map: Record<string, number> = {};
+    const trackedTickers = new Set(companies.map((company) => company.ticker.toUpperCase()));
+
+    for (const point of monthlyCloses) {
+      const ticker = point.ticker.toUpperCase();
+      if (point.year !== year || !months.includes(point.month) || !trackedTickers.has(ticker)) {
+        continue;
+      }
+      map[`${ticker}-${point.month}`] = point.close;
+    }
+
+    return map;
+  })();
+
+  if (!process.env.DATABASE_URL) {
+    return { map: fallback, source: "seed" as const };
+  }
+
+  try {
+    const startDate = new Date(Date.UTC(year, 0, 1));
+    const endDate = new Date(Date.UTC(year + 1, 0, 1));
+    const trackedTickers = companies.map((company) => company.ticker.toUpperCase());
+
+    const snapshots = await prisma.marketSnapshot.findMany({
+      where: {
+        asOfDate: { gte: startDate, lt: endDate },
+        company: {
+          ticker: { in: trackedTickers }
+        }
+      },
+      select: {
+        asOfDate: true,
+        closePrice: true,
+        company: { select: { ticker: true } }
+      },
+      orderBy: { asOfDate: "asc" }
+    });
+
+    const latestByTickerMonth = new Map<string, { timestamp: number; close: number }>();
+    for (const snapshot of snapshots) {
+      const month = snapshot.asOfDate.getUTCMonth() + 1;
+      if (!months.includes(month)) continue;
+
+      const key = `${snapshot.company.ticker.toUpperCase()}-${month}`;
+      const timestamp = snapshot.asOfDate.getTime();
+      const current = latestByTickerMonth.get(key);
+
+      if (!current || timestamp >= current.timestamp) {
+        latestByTickerMonth.set(key, { timestamp, close: snapshot.closePrice });
+      }
+    }
+
+    const map: Record<string, number> = {};
+    for (const [key, value] of latestByTickerMonth.entries()) {
+      map[key] = value.close;
+    }
+
+    const databaseCount = Object.keys(map).length;
+
+    const merged: Record<string, number> = {
+      ...fallback,
+      ...map
+    };
+
+    const fallbackCount = Object.keys(fallback).length;
+    const source = databaseCount > 0
+      ? (fallbackCount > databaseCount ? "mixed" as const : "database" as const)
+      : ("seed" as const);
+
+    return { map: merged, source };
+  } catch {
+    return { map: fallback, source: "seed" as const };
+  }
+}
+
 export default async function ChangesPage({ searchParams }: { searchParams: Promise<{ year?: string }> }) {
   const { year } = await searchParams;
   const availableYears = Array.from(new Set(basketChanges.map((change) => change.year))).sort((left, right) => left - right);
@@ -59,50 +199,66 @@ export default async function ChangesPage({ searchParams }: { searchParams: Prom
   const requestedYear = Number.isInteger(Number(year)) ? Number(year) : undefined;
   const selectedYear = requestedYear && availableYears.includes(requestedYear) ? requestedYear : latestYear;
   const { months, perMonth } = getStatusByMonthAndTicker(selectedYear, basketChanges);
+  const { map: monthlyCloseMap, source: closeSource } = await getMonthlyCloseMap(selectedYear, months);
 
-  const monthlySummary = months.map((month) => {
-    const statusMap = perMonth[month] ?? {};
+  const companySeries = companies.map((company) => {
+    const monthStatuses = months.reduce<Record<string, BasketStatus>>((accumulator, month) => {
+      accumulator[`${company.ticker.toUpperCase()}-${month}`] = perMonth[month]?.[company.ticker.toUpperCase()] ?? "inactive";
+      return accumulator;
+    }, {});
 
-    let changedCount = 0;
-    let inBasketCount = 0;
+    const values = buildIndexedSeries(months, monthStatuses, company.ticker, monthlyCloseMap);
+    const stats = getSeriesStats(values);
+    const addedCount = Object.values(monthStatuses).filter((status) => status === "added").length;
+    const removedCount = Object.values(monthStatuses).filter((status) => status === "removed").length;
 
-    for (const company of companies) {
-      const status = statusMap[company.ticker.toUpperCase()] ?? "inactive";
-
-      if (status === "added" || status === "maintained") {
-        inBasketCount += 1;
-      }
-      if (status === "added" || status === "removed") {
-        changedCount += 1;
-      }
-    }
-
-    return { month, inBasketCount, changedCount };
+    return {
+      company,
+      values,
+      stats,
+      addedCount,
+      removedCount
+    };
   });
+
+  const companiesWithLine = companySeries.filter((series) => series.stats.points >= 2).length;
+  const companiesWithSinglePoint = companySeries.filter((series) => series.stats.points === 1).length;
+  const companiesWithoutPoints = companySeries.filter((series) => series.stats.points === 0).length;
+
+  const allValues = companySeries
+    .flatMap((series) => series.values)
+    .filter((value): value is number => typeof value === "number");
+  const minimumValue = allValues.length ? Math.floor(Math.min(...allValues) - 1) : 95;
+  const maximumValue = allValues.length ? Math.ceil(Math.max(...allValues) + 1) : 105;
+  const normalizedMinimum = maximumValue - minimumValue < 6 ? minimumValue - 2 : minimumValue;
+  const normalizedMaximum = maximumValue - minimumValue < 6 ? maximumValue + 2 : maximumValue;
+
+  const sparklineWidth = 420;
+  const sparklineHeight = 150;
+  const sparklinePadding = 14;
 
   return (
     <div className="section">
       <section className="hero">
         <div className="hero__header">
           <div className="hero__title">
-            <div className="eyebrow">Basket history</div>
-            <h1>How the basket evolves over time</h1>
+            <div className="eyebrow">Company Trend Overview</div>
+            <h1>Company Trend Overview</h1>
           </div>
-          <div className="hero__visual">📜</div>
+          <div className="hero__visual">📈</div>
         </div>
         <div className="hero__body">
           <p className="lede">
-            Monthly overview of the HALO-aligned basket in {selectedYear}. Each company appears every month, with its status for that month.
+            Indexed mini-lines provide a calm, comparable view of how each company behaved across the selected period.
           </p>
           <p className="lede">
-            This uses the shared company list and the manual basket history file so the page stays transparent and easy to maintain.
+            Values are normalized to an index base of 100 so cross-currency behavior can be compared at a glance.
           </p>
         </div>
-        <div className="grid-4">
-          <div className="card stat"><span>Year</span><strong>{selectedYear}</strong></div>
-          <div className="card stat"><span>Months logged</span><strong>{months.length}</strong></div>
-          <div className="card stat"><span>Tracked companies</span><strong>{companies.length}</strong></div>
-          <div className="card stat"><span>Latest month changes</span><strong>{monthlySummary.at(-1)?.changedCount ?? 0}</strong></div>
+        <div className="kicker-row">
+          <span className="pill">Year {selectedYear}</span>
+          <span className="pill">Tracked companies {companies.length}</span>
+          <span className="pill">Window {months.map((month) => MONTH_LABELS[month].slice(0, 3)).join(" - ")}</span>
         </div>
       </section>
 
@@ -112,11 +268,11 @@ export default async function ChangesPage({ searchParams }: { searchParams: Prom
         <div className="section-heading">
           <div>
             <div className="eyebrow">Year selector</div>
-            <h2>Browse basket history by year</h2>
+            <h2>Browse trend overview by year</h2>
           </div>
           <p className="muted">The newest available year is selected automatically if no year is provided.</p>
         </div>
-        <div className="year-filter-group" role="navigation" aria-label="Available basket history years">
+        <div className="year-filter-group" role="navigation" aria-label="Available trend overview years">
           {availableYears.map((availableYear) => {
             const isActive = availableYear === selectedYear;
             return (
@@ -132,84 +288,78 @@ export default async function ChangesPage({ searchParams }: { searchParams: Prom
           })}
         </div>
         <div className="chart-annotation">
-          Sample data note: the 2025 and 2026 monthly histories on this page are placeholders so the selector, chart, and table can be reviewed before the real basket log is entered.
+          Data source: {closeSource === "database" ? "monthly closes from stored market snapshots" : closeSource === "mixed" ? "database closes plus fallback values" : "fallback monthly close file"}. Charts use the latest close available for each month.
         </div>
       </section>
 
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <div className="eyebrow">{selectedYear} overview</div>
-            <h2>Monthly overview</h2>
+            <div className="eyebrow">{selectedYear} indexed lines</div>
+            <h2>Behavior by company</h2>
           </div>
-          <p className="muted">Chart-ready monthly counts based on the manual basket history.</p>
+          <div className="changes-legend" aria-label="Trend key">
+            <span className="changes-legend__item"><i className="changes-cell changes-cell--added">+/-</i> Period change</span>
+            <span className="changes-legend__item"><i className="changes-cell changes-cell--maintained">100</i> Indexed base</span>
+          </div>
         </div>
 
-        <div className="grid-3">
-          {monthlySummary.map(({ month, inBasketCount, changedCount }) => (
-            <article className="card" key={month}>
-              <div className="eyebrow">{MONTH_LABELS[month]}</div>
-              <h3>{MONTH_LABELS[month]} {selectedYear}</h3>
-              <p>Companies in basket: {inBasketCount}</p>
-              <p>Companies changed: {changedCount}</p>
-            </article>
-          ))}
+        <div className="chart-annotation">
+          Data coverage for {selectedYear}: {companiesWithLine} companies with 2+ monthly points, {companiesWithSinglePoint} with one point, {companiesWithoutPoints} with no points.
         </div>
-      </section>
 
-      <section className="section-block">
-        {months.map((month) => {
-          const statusMap = perMonth[month] ?? {};
+        <div className="trend-grid">
+          {companySeries.map(({ company, values, stats, addedCount, removedCount }) => {
+            const path = buildSparklinePath(values, sparklineWidth, sparklineHeight, sparklinePadding, normalizedMinimum, normalizedMaximum);
+            const lineClass = stats.delta >= 0 ? "sparkline-line sparkline-line--up" : "sparkline-line sparkline-line--down";
 
-          return (
-          <section className="section-block" key={`${selectedYear}-${month}`} id={`month-${month}`}>
-            <div className="section-heading">
-              <div>
-                <div className="eyebrow">Month {month}</div>
-                <h3>{MONTH_LABELS[month]} {selectedYear}</h3>
-              </div>
-              <p className="muted">Status of each basket member this month.</p>
-            </div>
+            return (
+              <article className="card trend-card" key={company.ticker}>
+                <div className="trend-card__header">
+                  <div>
+                    <h3>
+                      <Link className="inline-link" href={`/company-profiles#${company.ticker.toLowerCase()}`}>
+                        {company.name} ({company.ticker})
+                      </Link>
+                    </h3>
+                    <p className="muted">{company.theme} · {company.currency}</p>
+                  </div>
+                  <span className={`trend-chip ${stats.delta >= 0 ? "trend-chip--up" : "trend-chip--down"}`}>
+                    {stats.delta > 0 ? "+" : ""}{stats.delta}%
+                  </span>
+                </div>
 
-            <div className="table-wrap table-wrap--changes">
-              <table>
-                <thead>
-                  <tr>
-                    <th>Company</th>
-                    <th>Ticker</th>
-                    <th>Theme</th>
-                    <th>Country</th>
-                    <th>Currency</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {companies.map((company) => {
-                    const status = statusMap[company.ticker.toUpperCase()] ?? "inactive";
+                <div className="sparkline-shell">
+                  <svg className="sparkline-svg" role="img" aria-label={`${company.name} indexed trend`} viewBox={`0 0 ${sparklineWidth} ${sparklineHeight}`}>
+                    <line className="sparkline-guide" x1={sparklinePadding} x2={sparklineWidth - sparklinePadding} y1={sparklineHeight / 2} y2={sparklineHeight / 2} />
+                    {path ? <path className={lineClass} d={path} /> : null}
+                    {values.map((value, index) => {
+                      if (value == null) return null;
+                      const x = sparklinePadding + ((sparklineWidth - sparklinePadding * 2) * index) / Math.max(values.length - 1, 1);
+                      const y = sparklinePadding + (sparklineHeight - sparklinePadding * 2) - ((value - normalizedMinimum) / Math.max(normalizedMaximum - normalizedMinimum, 1)) * (sparklineHeight - sparklinePadding * 2);
+                      return <circle className="sparkline-dot" cx={x} cy={y} key={`${company.ticker}-${index}`} r="3.5" />;
+                    })}
+                  </svg>
+                  <div className="sparkline-months" aria-hidden="true">
+                    {months.map((month) => (
+                      <span key={`${company.ticker}-${month}-label`}>{MONTH_LABELS[month].slice(0, 3)}</span>
+                    ))}
+                  </div>
+                </div>
 
-                    return (
-                    <tr key={`${selectedYear}-${month}-${company.ticker}`}>
-                      <td>
-                        <Link className="inline-link" href={`/company-profiles#${company.ticker.toLowerCase()}`}>
-                          {company.name}
-                        </Link>
-                      </td>
-                      <td>{company.ticker}</td>
-                      <td>{company.theme}</td>
-                      <td>{formatCountry(company.country)}</td>
-                      <td>{company.currency}</td>
-                      <td>
-                        <span className={`pill status-pill status-pill--${status}`}>{statusLabel(status)}</span>
-                      </td>
-                    </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
-          </section>
-          );
-        })}
+                {stats.points < 2 ? (
+                  <p className="muted">Not enough monthly closes yet to draw a full trend line for this company.</p>
+                ) : null}
+
+                <div className="trend-card__meta">
+                  <span>Index end {stats.end.toFixed(1)}</span>
+                  <span>Points {stats.points}</span>
+                  <span>A {addedCount} · R {removedCount}</span>
+                </div>
+              </article>
+            );
+          })}
+        </div>
       </section>
     </div>
   );
