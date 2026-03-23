@@ -16,10 +16,18 @@ type ScorePoint = {
   fullMark: number;
 };
 
+type BasketChangeTrendPoint = {
+  label: string;
+  monthLabel: string;
+  basketCount: number;
+  changedCount: number;
+};
+
 const CHART_COLORS = {
   basket: "#2d6a4f",
   benchmark: "#7d5a11",
   broaderHalo: "#7d8f86",
+  changes: "#b86b2f",
   bars: ["#2d6a4f", "#4d7c61", "#7ba286", "#9bb8a0", "#bfd0bf", "#d7dfcf"]
 };
 
@@ -61,6 +69,20 @@ function getPerformanceHighlight(data: PerformancePoint[]) {
   if (gap > 1.5) return `Over the latest ${latest.window} window, the basket is outperforming the benchmark by ${formatPercent(gap)}.`;
   if (gap < -1.5) return `Over the latest ${latest.window} window, the basket trails the benchmark by ${formatPercent(Math.abs(gap))}, which is worth watching in context.`;
   return `Over the latest ${latest.window} window, the basket and benchmark remain relatively close, which supports a calmer, medium-term reading.`;
+}
+
+function getBasketChangeHighlight(data: BasketChangeTrendPoint[]) {
+  if (!data.length) return "Add monthly history rows to reveal how the basket size evolves over time.";
+  const first = data[0];
+  const latest = data[data.length - 1];
+  const basketDelta = latest.basketCount - first.basketCount;
+  if (basketDelta > 0) {
+    return `Across the sample months, the basket expands from ${first.basketCount} to ${latest.basketCount} companies while monthly changes settle after the initial build.`;
+  }
+  if (basketDelta < 0) {
+    return `Across the sample months, the basket contracts from ${first.basketCount} to ${latest.basketCount} companies, which signals a more selective phase.`;
+  }
+  return `Across the sample months, the basket size stays stable while the change count shows how much maintenance work happened underneath.`;
 }
 
 export function PerformanceComparisonChart({ data }: { data: PerformancePoint[] }) {
@@ -171,6 +193,77 @@ export function SectorCompositionChart({ data }: { data: SectorPoint[] }) {
             <div className="chart-bar-track">
               <div className="chart-bar-fill" style={{ background: CHART_COLORS.bars[index % CHART_COLORS.bars.length], width: `${(item.count / maxCount) * 100}%` }} />
             </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export function BasketChangeTrendChart({ data }: { data: BasketChangeTrendPoint[] }) {
+  const width = 760;
+  const height = 320;
+  const padding = 34;
+  const allValues = data.flatMap((item) => [item.basketCount, item.changedCount]);
+  const minValue = 0;
+  const maxValue = Math.max(...allValues, 1) + 2;
+  const basketValues = data.map((item) => item.basketCount);
+  const changedValues = data.map((item) => item.changedCount);
+  const basketPoints = getPointCoordinates(basketValues, width, height, padding, minValue, maxValue);
+  const changedPoints = getPointCoordinates(changedValues, width, height, padding, minValue, maxValue);
+  const yTicks = 4;
+
+  return (
+    <div className="chart-shell">
+      <div className="chart-shell__header">
+        <div className="eyebrow">History trend</div>
+        <h2>Basket size by month</h2>
+        <p className="muted">This sample chart uses the manual monthly history so you can see basket size and membership activity at a glance.</p>
+      </div>
+      <div className="chart-area">
+        <svg aria-label="Basket size and monthly changes trend chart" className="chart-svg" viewBox={`0 0 ${width} ${height}`}>
+          {Array.from({ length: yTicks + 1 }).map((_, index) => {
+            const ratio = index / yTicks;
+            const y = padding + (height - padding * 2) * ratio;
+            const tickValue = maxValue - (maxValue - minValue) * ratio;
+            return (
+              <g key={tickValue}>
+                <line className="chart-grid-line" x1={padding} x2={width - padding} y1={y} y2={y} />
+                <text className="chart-axis-label" x={10} y={y + 4}>
+                  {Math.round(tickValue)}
+                </text>
+              </g>
+            );
+          })}
+          {data.map((item, index) => {
+            const x = padding + ((width - padding * 2) * index) / Math.max(data.length - 1, 1);
+            return (
+              <text className="chart-axis-label" key={item.label} textAnchor="middle" x={x} y={height - 10}>
+                {item.label}
+              </text>
+            );
+          })}
+          <path className="chart-line chart-line--basket" d={buildLinePath(basketValues, width, height, padding, minValue, maxValue)} />
+          <path className="chart-line chart-line--changes" d={buildLinePath(changedValues, width, height, padding, minValue, maxValue)} />
+          {basketPoints.map((point, index) => (
+            <circle className="chart-dot chart-dot--basket" cx={point.x} cy={point.y} key={`basket-history-${data[index]?.label ?? index}`} r="4.5" />
+          ))}
+          {changedPoints.map((point, index) => (
+            <circle className="chart-dot chart-dot--changes" cx={point.x} cy={point.y} key={`changes-history-${data[index]?.label ?? index}`} r="4" />
+          ))}
+        </svg>
+      </div>
+      <div className="chart-legend" aria-hidden="true">
+        <span><i className="chart-swatch chart-swatch--basket" /> Basket size</span>
+        <span><i className="chart-swatch chart-swatch--changes" /> Companies changed</span>
+      </div>
+      <div className="chart-annotation">{getBasketChangeHighlight(data)}</div>
+      <div className="chart-summary-grid">
+        {data.map((item) => (
+          <div className="chart-summary-card" key={item.label}>
+            <strong>{item.monthLabel}</strong>
+            <span>Basket size {item.basketCount}</span>
+            <span>Companies changed {item.changedCount}</span>
           </div>
         ))}
       </div>

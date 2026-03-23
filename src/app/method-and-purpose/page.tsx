@@ -91,7 +91,7 @@ export default async function MethodAndPurposePage() {
           </div>
           <div>
             <h3 style={{ fontSize: '1.2rem' }}>4. Verify Official Sources</h3>
-            <p style={{ fontSize: '0.94rem' }}>We provide <Link href="/sources" className="inline-link" style={{ fontWeight: 600 }}>direct source links</Link> to help you verify data and ground your own understanding in primary materials.</p>
+            <p style={{ fontSize: '0.94rem' }}>We provide <Link href="/company-profiles" className="inline-link" style={{ fontWeight: 600 }}>direct source links</Link> to help you verify data and ground your own understanding in primary materials.</p>
           </div>
         </div>
       </section>

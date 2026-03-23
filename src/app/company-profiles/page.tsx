@@ -1,4 +1,5 @@
 import { getSourcesDirectory } from "@/lib/server/repository";
+import { formatCountry } from "@/lib/utils";
 
 export default async function SourcesPage() {
   const directory = await getSourcesDirectory();
@@ -23,10 +24,10 @@ export default async function SourcesPage() {
       </section>
       <section className="grid-2">
         {directory.map((entry) => (
-          <div className="card" key={entry.ticker}>
+          <div className="card profile-anchor" id={entry.ticker.toLowerCase()} key={entry.ticker}>
             <div className="card__header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', borderBottom: '1px solid var(--line-soft)', paddingBottom: '14px', marginBottom: '16px' }}>
               <div>
-                <div className="eyebrow" style={{ opacity: 0.6 }}>{entry.ticker} · {entry.country}</div>
+                <div className="eyebrow" style={{ opacity: 0.6 }}>{entry.ticker} · {formatCountry(entry.country)}</div>
                 <h2 style={{ margin: '4px 0 0' }}>{entry.name}</h2>
               </div>
               <div className="pill green" style={{ fontSize: '0.74rem' }}>{entry.sector}</div>

@@ -164,6 +164,13 @@ select {
 }
 .button:hover, button:hover { transform: translateY(-1px); box-shadow: var(--shadow-soft); }
 .button.secondary { background: transparent; color: var(--ink); border: 1px solid var(--line); }
+.year-filter-group { display: flex; flex-wrap: wrap; gap: 12px; }
+.year-filter { min-width: 88px; justify-content: center; }
+.year-filter--active {
+  background: var(--ink);
+  color: white;
+  border-color: var(--ink);
+}
 .button:disabled, button:disabled { opacity: 0.7; cursor: wait; transform: none; box-shadow: none; }
 
 .newsletter-form {
@@ -209,16 +216,19 @@ select {
 .chart-line--basket { stroke: #2d6a4f; }
 .chart-line--benchmark { stroke: #7d5a11; }
 .chart-line--broader { stroke: #7d8f86; stroke-width: 3; }
+.chart-line--changes { stroke: #b86b2f; stroke-dasharray: 8 6; }
 .chart-dot { stroke: #fffaf2; stroke-width: 2; }
 .chart-dot--basket { fill: #2d6a4f; }
 .chart-dot--benchmark { fill: #7d5a11; }
 .chart-dot--broader { fill: #7d8f86; }
+.chart-dot--changes { fill: #b86b2f; }
 .chart-legend { display: flex; flex-wrap: wrap; gap: 18px; color: var(--muted); font-size: 0.94rem; }
 .chart-legend span { display: inline-flex; align-items: center; gap: 8px; }
 .chart-swatch { display: inline-block; width: 18px; height: 4px; border-radius: 999px; }
 .chart-swatch--basket { background: #2d6a4f; }
 .chart-swatch--benchmark { background: #7d5a11; }
 .chart-swatch--broader { background: #7d8f86; }
+.chart-swatch--changes { background: #b86b2f; }
 .chart-summary-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .chart-summary-card { display: grid; gap: 6px; padding: 12px 14px; border-radius: 14px; background: rgba(242, 234, 217, 0.72); border: 1px solid var(--line); color: var(--muted); }
 .chart-summary-card strong { color: var(--ink); }
@@ -258,6 +268,8 @@ select {
 .source-link::after { content: "→"; opacity: 0.4; }
 .source-link:hover::after { opacity: 1; }
 
+.profile-anchor { scroll-margin-top: 110px; }
+
 .table-wrap { overflow-x: auto; }
 .table-wrap--editorial { padding: 26px; }
 .table-wrap--editorial table { width: 100%; table-layout: fixed; border-collapse: collapse; }
@@ -295,6 +307,43 @@ select {
 .table-wrap--editorial td:first-child a { color: var(--accent); font-weight: 600; }
 .table-wrap--editorial td,
 .table-wrap--editorial th { padding: 14px 16px; text-align: left; border-bottom: 1px solid var(--line); font-size: 0.95rem; }
+
+.table-wrap--changes { padding: 26px; }
+.table-wrap--changes table { width: 100%; table-layout: fixed; border-collapse: collapse; }
+.table-wrap--changes thead th,
+.table-wrap--changes tbody td {
+  padding: 14px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+  font-size: 0.95rem;
+}
+.table-wrap--changes thead th {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+.table-wrap--changes tbody tr:nth-child(2n) { background: rgba(242, 234, 217, 0.26); }
+.table-wrap--changes tbody tr:hover { background: rgba(223, 234, 221, 0.32); }
+.table-wrap--changes thead th:nth-child(1),
+.table-wrap--changes tbody td:nth-child(1) { width: 24%; }
+.table-wrap--changes thead th:nth-child(2),
+.table-wrap--changes tbody td:nth-child(2) { width: 10%; }
+.table-wrap--changes thead th:nth-child(3),
+.table-wrap--changes tbody td:nth-child(3) { width: 24%; }
+.table-wrap--changes thead th:nth-child(4),
+.table-wrap--changes tbody td:nth-child(4) { width: 16%; }
+.table-wrap--changes thead th:nth-child(5),
+.table-wrap--changes tbody td:nth-child(5) { width: 10%; }
+.table-wrap--changes thead th:nth-child(6),
+.table-wrap--changes tbody td:nth-child(6) { width: 16%; }
+
+.status-pill { text-transform: capitalize; }
+.status-pill--added { background: var(--accent-soft); color: var(--accent); }
+.status-pill--maintained { background: var(--surface-strong); color: var(--ink); }
+.status-pill--removed { background: #f1d9cf; color: #6d4026; }
+.status-pill--inactive { background: rgba(213, 204, 185, 0.38); color: var(--muted); }
 
 .sortable-th {
   padding: 0 !important; /* Remove individual padding to let the Link fill the cell */
@@ -402,7 +451,10 @@ select {
   .footer-links { gap: 18px; }
   .table-wrap--editorial { padding: 18px; }
   .table-wrap--editorial td,
-  .table-wrap--editorial th { padding: 12px 10px; font-size: 0.9rem; }
+  .table-wrap--editorial th,
+  .table-wrap--changes,
+  .table-wrap--changes td,
+  .table-wrap--changes th { padding: 12px 10px; font-size: 0.9rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {

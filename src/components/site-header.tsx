@@ -15,7 +15,7 @@ export function SiteHeader() {
           <Link href="/changes">Recent changes</Link>
           <Link href="/method-and-purpose">Method and Purpose</Link>
           <Link href="/newsletter">Newsletter</Link>
-          <Link href="/sources">Company profiles</Link>
+          <Link href="/company-profiles">Company profiles</Link>
           <Link href="/resources">Resources</Link>
         </nav>
       </div>

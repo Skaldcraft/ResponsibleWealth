@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { Disclaimer } from "@/components/disclaimer";
 import { CompanyScoreChart } from "@/components/research-charts";
 import { getCompanyByTicker } from "@/lib/server/repository";
-import { formatDate, formatPercent } from "@/lib/utils";
+import { formatCountry, formatDate, formatPercent } from "@/lib/utils";
 
 export default async function CompanyPage({ params }: { params: Promise<{ ticker: string }> }) {
   const { ticker } = await params;
@@ -29,7 +29,7 @@ export default async function CompanyPage({ params }: { params: Promise<{ ticker
         <div className="kicker-row">
           <span className={`pill ${company.esgCategory}`}>{company.esgCategory}</span>
           <span className="pill">{company.sector}</span>
-          <span className="pill">{company.country}</span>
+          <span className="pill">{formatCountry(company.country)}</span>
         </div>
       </section>
       <Disclaimer compact />

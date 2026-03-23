@@ -5,7 +5,7 @@ describe("repository", () => {
   it("returns the seeded basket overview", async () => {
     const overview = await getBasketOverview();
     expect(overview.basket.slug).toBe("halo-esg");
-    expect(overview.companies.length).toBe(18);
+    expect(overview.companies.length).toBe(24);
   }, 20000);
 
   it("finds companies by ticker", async () => {

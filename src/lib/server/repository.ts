@@ -1,6 +1,21 @@
 import { NewsletterRunStatus } from "@prisma/client";
+import { getCompanyDirectoryEntry } from "@/data/companies";
 import { basketSeed, benchmarkSeed, newsletterArchiveSeed, resourceGuidesSeed, seedCompanies } from "@/lib/content/seed";
 import { prisma } from "@/lib/server/prisma";
+
+function getSharedCompanyFields(ticker: string) {
+  const company = getCompanyDirectoryEntry(ticker);
+  if (!company) {
+    return null;
+  }
+
+  return {
+    name: company.name,
+    country: company.country,
+    sector: company.theme,
+    currency: company.currency
+  };
+}
 
 async function withFallback<T>(query: () => Promise<T>, fallback: () => T | Promise<T>) {
   if (!process.env.DATABASE_URL) {
@@ -65,38 +80,41 @@ export async function getBasketOverview(options?: { sortBy?: "name" | "price"; o
         throw new Error("No basket");
       }
 
-      let companies = basket.members.map(({ company }) => ({
-        ticker: company.ticker,
-        slug: company.slug,
-        name: company.name,
-        sector: company.sector,
-        country: company.country,
-        exchange: company.exchange,
-        shortDescription: company.shortDescription,
-        lifecycleStatus: company.lifecycleStatus,
-        haloFit: company.haloFit,
-        esgFit: company.esgFit,
-        mediumTermScore: company.mediumTermScore,
-        esgCategory: company.esgProfile?.category ?? "mixed",
-        rationaleShort: company.esgProfile?.rationaleShort ?? "",
-        rationaleLong: company.esgProfile?.rationaleLong ?? "",
-        strengths: company.esgProfile?.strengths ?? "",
-        concerns: company.esgProfile?.concerns ?? "",
-        watchpoints: [] as string[],
-        sources: [] as Array<{ type?: string; label: string; url: string }>,
-        updates: [] as Array<{ title: string; summary: string; body: string; updateType: string; effectiveDate: string }>,
-        reviews: [] as Array<{ reviewType: string; summary: string; reviewedAt: string }>,
-        snapshot: {
-          asOfDate: company.marketSnapshots[0]?.asOfDate.toISOString() ?? seedCompanies[0].snapshot.asOfDate,
-          currency: company.marketSnapshots[0]?.currency ?? "USD",
-          closePrice: company.marketSnapshots[0]?.closePrice ?? 0,
-          dayChangePct: company.marketSnapshots[0]?.dayChangePct ?? 0,
-          monthReturnPct: company.marketSnapshots[0]?.monthReturnPct ?? 0,
-          ytdReturnPct: company.marketSnapshots[0]?.ytdReturnPct ?? 0,
-          oneYearReturnPct: company.marketSnapshots[0]?.oneYearReturnPct ?? 0,
-          isDelayed: company.marketSnapshots[0]?.isDelayed ?? true
-        }
-      }));
+      let companies = basket.members.map(({ company }) => {
+        const shared = getSharedCompanyFields(company.ticker);
+        return {
+          ticker: company.ticker,
+          slug: company.slug,
+          name: shared?.name ?? company.name,
+          sector: shared?.sector ?? company.sector,
+          country: shared?.country ?? company.country,
+          exchange: company.exchange,
+          shortDescription: company.shortDescription,
+          lifecycleStatus: company.lifecycleStatus,
+          haloFit: company.haloFit,
+          esgFit: company.esgFit,
+          mediumTermScore: company.mediumTermScore,
+          esgCategory: company.esgProfile?.category ?? "mixed",
+          rationaleShort: company.esgProfile?.rationaleShort ?? "",
+          rationaleLong: company.esgProfile?.rationaleLong ?? "",
+          strengths: company.esgProfile?.strengths ?? "",
+          concerns: company.esgProfile?.concerns ?? "",
+          watchpoints: [] as string[],
+          sources: [] as Array<{ type?: string; label: string; url: string }>,
+          updates: [] as Array<{ title: string; summary: string; body: string; updateType: string; effectiveDate: string }>,
+          reviews: [] as Array<{ reviewType: string; summary: string; reviewedAt: string }>,
+          snapshot: {
+            asOfDate: company.marketSnapshots[0]?.asOfDate.toISOString() ?? seedCompanies[0].snapshot.asOfDate,
+            currency: shared?.currency ?? company.marketSnapshots[0]?.currency ?? "USD",
+            closePrice: company.marketSnapshots[0]?.closePrice ?? 0,
+            dayChangePct: company.marketSnapshots[0]?.dayChangePct ?? 0,
+            monthReturnPct: company.marketSnapshots[0]?.monthReturnPct ?? 0,
+            ytdReturnPct: company.marketSnapshots[0]?.ytdReturnPct ?? 0,
+            oneYearReturnPct: company.marketSnapshots[0]?.oneYearReturnPct ?? 0,
+            isDelayed: company.marketSnapshots[0]?.isDelayed ?? true
+          }
+        };
+      });
 
       // Apply sorting if requested
       if (options?.sortBy) {
@@ -143,7 +161,19 @@ export async function getBasketOverview(options?: { sortBy?: "name" | "price"; o
       };
     },
     async () => {
-      let companies = [...seedCompanies];
+      let companies = seedCompanies.map((company) => {
+        const shared = getSharedCompanyFields(company.ticker);
+        return {
+          ...company,
+          name: shared?.name ?? company.name,
+          country: shared?.country ?? company.country,
+          sector: shared?.sector ?? company.sector,
+          snapshot: {
+            ...company.snapshot,
+            currency: shared?.currency ?? company.snapshot.currency
+          }
+        };
+      });
       if (options?.sortBy) {
         const { sortBy, order = "asc" } = options;
         companies.sort((a, b) => {
@@ -191,14 +221,16 @@ export async function getCompanyByTicker(ticker: string) {
         return null;
       }
 
+      const shared = getSharedCompanyFields(company.ticker);
+
       return {
         id: company.id,
         ticker: company.ticker,
         slug: company.slug,
-        name: company.name,
+        name: shared?.name ?? company.name,
         exchange: company.exchange,
-        country: company.country,
-        sector: company.sector,
+        country: shared?.country ?? company.country,
+        sector: shared?.sector ?? company.sector,
         shortDescription: company.shortDescription,
         lifecycleStatus: company.lifecycleStatus,
         haloFit: company.haloFit,
@@ -213,7 +245,7 @@ export async function getCompanyByTicker(ticker: string) {
         sources: company.sources.map((source) => ({ type: source.type, label: source.label, url: source.url })),
         snapshot: {
           asOfDate: company.marketSnapshots[0]?.asOfDate.toISOString() ?? new Date().toISOString(),
-          currency: company.marketSnapshots[0]?.currency ?? "USD",
+          currency: shared?.currency ?? company.marketSnapshots[0]?.currency ?? "USD",
           closePrice: company.marketSnapshots[0]?.closePrice ?? 0,
           dayChangePct: company.marketSnapshots[0]?.dayChangePct ?? 0,
           monthReturnPct: company.marketSnapshots[0]?.monthReturnPct ?? 0,
@@ -237,7 +269,22 @@ export async function getCompanyByTicker(ticker: string) {
     },
     () => {
       const company = seedCompanies.find((item) => item.ticker.toLowerCase() === ticker.toLowerCase());
-      return company ? { id: company.ticker, ...company } : null;
+      if (!company) {
+        return null;
+      }
+
+      const shared = getSharedCompanyFields(company.ticker);
+      return {
+        id: company.ticker,
+        ...company,
+        name: shared?.name ?? company.name,
+        country: shared?.country ?? company.country,
+        sector: shared?.sector ?? company.sector,
+        snapshot: {
+          ...company.snapshot,
+          currency: shared?.currency ?? company.snapshot.currency
+        }
+      };
     }
   );
 }
@@ -253,28 +300,34 @@ export async function getAllCompanies() {
           marketSnapshots: { take: 1, orderBy: { asOfDate: "desc" } }
         }
       });
-      return companies.map((company) => ({
-        id: company.id,
-        ticker: company.ticker,
-        name: company.name,
-        sector: company.sector,
-        lifecycleStatus: company.lifecycleStatus,
-        basketStatus: company.basketMembers[0]?.membershipStatus ?? "inactive",
-        esgCategory: company.esgProfile?.category ?? "mixed",
-        monthReturnPct: company.marketSnapshots[0]?.monthReturnPct ?? null
-      }));
+      return companies.map((company) => {
+        const shared = getSharedCompanyFields(company.ticker);
+        return {
+          id: company.id,
+          ticker: company.ticker,
+          name: shared?.name ?? company.name,
+          sector: shared?.sector ?? company.sector,
+          lifecycleStatus: company.lifecycleStatus,
+          basketStatus: company.basketMembers[0]?.membershipStatus ?? "inactive",
+          esgCategory: company.esgProfile?.category ?? "mixed",
+          monthReturnPct: company.marketSnapshots[0]?.monthReturnPct ?? null
+        };
+      });
     },
     () =>
-      seedCompanies.map((company) => ({
-        id: company.ticker,
-        ticker: company.ticker,
-        name: company.name,
-        sector: company.sector,
-        lifecycleStatus: company.lifecycleStatus,
-        basketStatus: "active",
-        esgCategory: company.esgCategory,
-        monthReturnPct: company.snapshot.monthReturnPct
-      }))
+      seedCompanies.map((company) => {
+        const shared = getSharedCompanyFields(company.ticker);
+        return {
+          id: company.ticker,
+          ticker: company.ticker,
+          name: shared?.name ?? company.name,
+          sector: shared?.sector ?? company.sector,
+          lifecycleStatus: company.lifecycleStatus,
+          basketStatus: "active",
+          esgCategory: company.esgCategory,
+          monthReturnPct: company.snapshot.monthReturnPct
+        };
+      })
   );
 }
 
@@ -299,7 +352,7 @@ export async function getRecentChanges() {
       });
 
       return updates.map((update) => ({
-        companyName: update.company.name,
+        companyName: getSharedCompanyFields(update.company.ticker)?.name ?? update.company.name,
         ticker: update.company.ticker,
         title: update.title,
         summary: update.summary,
@@ -311,7 +364,7 @@ export async function getRecentChanges() {
       seedCompanies
         .flatMap((company) =>
           company.updates.map((update) => ({
-            companyName: company.name,
+            companyName: getSharedCompanyFields(company.ticker)?.name ?? company.name,
             ticker: company.ticker,
             title: update.title,
             summary: update.summary,
@@ -391,31 +444,37 @@ export async function getSourcesDirectory() {
           esgProfile: true
         }
       });
-      return companies.map((company) => ({
-        ticker: company.ticker,
-        name: company.name,
-        country: company.country,
-        sector: company.sector,
-        shortDescription: company.shortDescription,
-        rationaleShort: company.esgProfile?.rationaleShort ?? "",
-        rationaleLong: company.esgProfile?.rationaleLong ?? "",
-        strengths: company.esgProfile?.strengths ?? "",
-        concerns: company.esgProfile?.concerns ?? "",
-        sources: company.sources.map((source) => ({ type: source.type, label: source.label, url: source.url }))
-      }));
+      return companies.map((company) => {
+        const shared = getSharedCompanyFields(company.ticker);
+        return {
+          ticker: company.ticker,
+          name: shared?.name ?? company.name,
+          country: shared?.country ?? company.country,
+          sector: shared?.sector ?? company.sector,
+          shortDescription: company.shortDescription,
+          rationaleShort: company.esgProfile?.rationaleShort ?? "",
+          rationaleLong: company.esgProfile?.rationaleLong ?? "",
+          strengths: company.esgProfile?.strengths ?? "",
+          concerns: company.esgProfile?.concerns ?? "",
+          sources: company.sources.map((source) => ({ type: source.type, label: source.label, url: source.url }))
+        };
+      });
     },
-    () => seedCompanies.map((company) => ({ 
-      ticker: company.ticker, 
-      name: company.name, 
-      country: company.country,
-      sector: company.sector,
-      shortDescription: company.shortDescription,
-      rationaleShort: company.rationaleShort,
-      rationaleLong: company.rationaleLong,
-      strengths: company.strengths,
-      concerns: company.concerns,
-      sources: company.sources 
-    }))
+    () => seedCompanies.map((company) => {
+      const shared = getSharedCompanyFields(company.ticker);
+      return {
+        ticker: company.ticker,
+        name: shared?.name ?? company.name,
+        country: shared?.country ?? company.country,
+        sector: shared?.sector ?? company.sector,
+        shortDescription: company.shortDescription,
+        rationaleShort: company.rationaleShort,
+        rationaleLong: company.rationaleLong,
+        strengths: company.strengths,
+        concerns: company.concerns,
+        sources: company.sources
+      };
+    })
   );
 }
 

@@ -384,7 +384,7 @@ export const seedCompanies: SeedCompany[] = [
     strengths: "Durable network assets, lower-emission freight relevance, essential transport role.",
     concerns: "Freight cycles and execution.",
     watchpoints: ["Cross-border volume trends.", "Network productivity.", "Operating margins."],
-    sustainabilityUrl: "https://investors.duke-energy.com/esg/governance-documents/",
+    sustainabilityUrl: "https://www.cn.ca/en/delivering-responsibly/",
     marketUrl: "https://finance.yahoo.com/quote/CNI/",
     newsUrl: "https://www.cn.ca/en/media/news/",
     snapshot: { asOfDate: date, currency: "CAD", closePrice: 168.42, dayChangePct: 0.2, monthReturnPct: 1.3, ytdReturnPct: 2.4, oneYearReturnPct: 6.9, isDelayed: true }
