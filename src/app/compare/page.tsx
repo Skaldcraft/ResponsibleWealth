@@ -1,5 +1,5 @@
 import { Disclaimer } from "@/components/disclaimer";
-import HALOCalculator from "@/components/halo-calculator";
+import ThisIsTheCalculator from "@/components/this-is-the-calculator";
 
 export default function ComparePage() {
   return (
@@ -14,16 +14,16 @@ export default function ComparePage() {
         </div>
         <div className="hero__body">
           <p className="lede">
-            Use the interactive calculator to explore how different growth paths can diverge over medium and long horizons.
+            Use the side-by-side analysis to compare HALO ESG index companies across fit, thesis, performance context, and excluded alternatives.
           </p>
           <p className="lede">
-            It keeps the same educational goal: context over noise, with inflation and assumptions shown explicitly.
+            The focus stays on medium-term interpretation rather than day-to-day market noise.
           </p>
         </div>
       </section>
       <Disclaimer compact />
       <section className="card">
-        <HALOCalculator />
+        <ThisIsTheCalculator />
       </section>
     </div>
   );

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Disclaimer } from "@/components/disclaimer";
 import { NewsletterSignup } from "@/components/newsletter-signup";
-import { PerformanceComparisonChart, SectorCompositionChart } from "@/components/research-charts";
+import ThisIsTheCalculator from "@/components/this-is-the-calculator";
+import { SectorCompositionChart } from "@/components/research-charts";
 import { SortableBasketTable } from "@/components/sortable-basket-table";
 import { getBasketOverview, getRecentChanges } from "@/lib/server/repository";
 import { formatDate, formatPercent } from "@/lib/utils";
@@ -14,27 +15,6 @@ export async function BasketPageContent({ sortBy, order }: { sortBy?: "name" | "
   const featuredChanges = recentChanges.slice(0, 3);
   const latestAsOfDate = overview.companies[0]?.snapshot.asOfDate ?? overview.benchmark.snapshot.asOfDate;
   
-  const performanceData = [
-    {
-      window: "1M",
-      basket: Number(overview.averageMonthReturn.toFixed(1)),
-      benchmark: overview.benchmark.snapshot.monthReturnPct,
-      broaderHalo: 1.3
-    },
-    {
-      window: "YTD",
-      basket: Number((overview.companies.reduce((sum, company) => sum + (company.snapshot?.ytdReturnPct ?? 0), 0) / Math.max(overview.companies.length, 1)).toFixed(1)),
-      benchmark: overview.benchmark.snapshot.ytdReturnPct,
-      broaderHalo: 6.1
-    },
-    {
-      window: "1Y",
-      basket: Number((overview.companies.reduce((sum, company) => sum + (company.snapshot?.oneYearReturnPct ?? 0), 0) / Math.max(overview.companies.length, 1)).toFixed(1)),
-      benchmark: overview.benchmark.snapshot.oneYearReturnPct,
-      broaderHalo: 11.6
-    }
-  ];
-
   const SECTOR_MAPPING: Record<string, string> = {
     // 1. Energy Generation & Grid Infrastructure
     "Renewable Utilities": "Energy Generation & Grid Infrastructure",
@@ -105,17 +85,24 @@ export async function BasketPageContent({ sortBy, order }: { sortBy?: "name" | "
       <section className="section-block">
         <div className="section-heading">
           <div>
-            <div className="eyebrow">Visual overview</div>
-            <h2>Performance and composition at a glance</h2>
+            <div className="eyebrow">Interactive analysis</div>
+            <h2>Side-by-side comparison inside the index</h2>
           </div>
         </div>
-        <div className="grid-2">
-          <div className="card card--chart">
-            <PerformanceComparisonChart data={performanceData} />
+        <div className="card card--chart">
+          <ThisIsTheCalculator />
+        </div>
+      </section>
+
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">Visual overview</div>
+            <h2>Sector composition at a glance</h2>
           </div>
-          <div className="card card--chart">
-            <SectorCompositionChart data={sectorData} />
-          </div>
+        </div>
+        <div className="card card--chart">
+          <SectorCompositionChart data={sectorData} />
         </div>
       </section>
 

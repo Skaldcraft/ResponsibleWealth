@@ -103,7 +103,7 @@ export function PerformanceComparisonChart({ data }: { data: PerformancePoint[] 
   return (
     <div className="chart-shell">
       <div className="chart-shell__header">
-        <div className="eyebrow">Performance path</div>
+        <div className="eyebrow">Performance chart</div>
         <h2>Basket vs benchmark</h2>
         <p className="muted">A medium-term comparison across the windows that matter most for this project.</p>
         <div className="chart-shell__meta">
